@@ -1,0 +1,8 @@
+name: 'EventFlow Migrations'
+type: module
+description: 'Import des prestataires depuis l API Recherche d entreprises.'
+package: EventFlow
+core_version_requirement: ^11
+dependencies:
+  - drupal:migrate
+  - drupal:migrate_plus

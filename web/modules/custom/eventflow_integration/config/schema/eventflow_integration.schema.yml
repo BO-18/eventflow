@@ -1,0 +1,9 @@
+# Schema for EventFlow Integration configuration.
+
+eventflow_integration.settings:
+  type: config_object
+  label: 'EventFlow Integration settings'
+  mapping:
+    supplier_api_url:
+      type: string
+      label: 'Supplier API URL'

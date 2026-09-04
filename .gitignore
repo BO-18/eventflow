@@ -1,0 +1,8 @@
+/vendor/
+/web/core/
+/web/modules/contrib/
+/web/themes/contrib/
+/web/profiles/contrib/
+/web/sites/*/files/
+.ddev/db_snapshots/
+web/sites/default/settings.php

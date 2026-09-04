@@ -1,0 +1,5 @@
+eventflow_integration.settings:
+  title: 'EventFlow Integration'
+  description: 'Configuration du Supplier API EventFlow.'
+  route_name: eventflow_integration.settings
+  parent: system.admin_config_services

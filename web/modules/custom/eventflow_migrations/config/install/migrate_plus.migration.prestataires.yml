@@ -1,0 +1,53 @@
+id: prestataires
+label: "Import des prestataires via l'API Recherche d'entreprises"
+migration_group: eventflow
+source:
+  plugin: url
+  data_fetcher_plugin: http
+  data_parser_plugin: json
+  urls:
+    - 'https://recherche-entreprises.api.gouv.fr/search?q=escape%20game&departement=75&per_page=10'
+  item_selector: results
+  fields:
+    - name: siren
+      label: 'SIREN'
+      selector: siren
+    - name: nom
+      label: 'Nom'
+      selector: nom_complet
+    - name: activite
+      label: 'Activite principale'
+      selector: activite_principale
+    - name: etat
+      label: 'Etat administratif'
+      selector: etat_administratif
+    - name: departement
+      label: 'Departement'
+      selector: siege/departement
+    - name: ville
+      label: 'Ville'
+      selector: siege/libelle_commune
+  ids:
+    siren:
+      type: string
+destination:
+  plugin: 'entity:node'
+  default_bundle: prestataire
+process:
+  title: nom
+  field_siren: siren
+  field_activite_declaree: activite
+  field_departement: departement
+  field_ville: ville
+  field_statut:
+    plugin: static_map
+    source: etat
+    map:
+      A: Actif
+      C: Fermé
+      F: Fermé
+    default_value: Fermé
+  status:
+    plugin: default_value
+    default_value: 1
+migration_dependencies: {}

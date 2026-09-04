@@ -1,0 +1,7 @@
+eventflow_integration.settings:
+  path: '/admin/config/services/eventflow-integration'
+  defaults:
+    _form: '\Drupal\eventflow_integration\Form\SettingsForm'
+    _title: 'EventFlow Integration'
+  requirements:
+    _permission: 'administer site configuration'

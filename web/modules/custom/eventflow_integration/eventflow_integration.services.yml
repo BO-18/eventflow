@@ -1,0 +1,10 @@
+services:
+  eventflow_integration.order_paid_subscriber:
+    class: Drupal\eventflow_integration\EventSubscriber\OrderPaidSubscriber
+    arguments:
+      - '@http_client'
+      - '@logger.factory'
+      - '@entity_type.manager'
+      - '@config.factory'
+    tags:
+      - { name: event_subscriber }

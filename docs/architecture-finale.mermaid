@@ -1,0 +1,38 @@
+flowchart TD
+    subgraph SOURCES["Sources externes"]
+        DJ["DummyJSON - explore, non integre"]
+        RE["API Recherche d'entreprises"]
+        STRIPE["Stripe API - mode test"]
+        SUPPLIER["Supplier API fictif - Postman Mock Server"]
+    end
+
+    subgraph DRUPAL["Drupal 11"]
+        MIG["eventflow_migrations - Migrate Plus, YAML uniquement"]
+        PREST["Prestataire - node"]
+        VIEWPREST["Vue /prestataires + filtres"]
+
+        ACT["Activite - node"]
+        VIEWACT["Vue /activites + filtres"]
+
+        COMMERCE["Drupal Commerce - produit, panier, checkout"]
+
+        SUB["eventflow_integration - OrderPaidSubscriber.php"]
+        CONF["Configuration - Supplier API URL - ConfigFormBase"]
+        LOG["Journal de synchronisation - node"]
+        DASH["Dashboard /dashboard/synchronisation"]
+    end
+
+    CLIENT["Client"]
+
+    RE --> MIG --> PREST --> VIEWPREST
+    PREST --> ACT --> VIEWACT
+
+    CLIENT --> VIEWACT
+    CLIENT --> COMMERCE
+    COMMERCE --> STRIPE
+    STRIPE -->|"OrderEvents::ORDER_PAID"| SUB
+    CONF --> SUB
+    SUB -->|"HTTP POST"| SUPPLIER
+    SUPPLIER -->|"JSON: reservation_id, status"| SUB
+    SUB -->|"succes ou erreur"| LOG
+    LOG --> DASH

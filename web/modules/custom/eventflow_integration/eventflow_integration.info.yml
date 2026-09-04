@@ -1,0 +1,7 @@
+name: 'EventFlow Integration'
+type: module
+description: 'Synchronisation des commandes payées avec le fournisseur de réservation.'
+package: EventFlow
+core_version_requirement: ^11
+dependencies:
+  - drupal:commerce_order

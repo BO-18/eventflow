@@ -67,7 +67,7 @@ Schéma détaillé : voir `parcours-utilisateur-eventflow.mermaid` (livré en d�
 | US19 | Suivre le statut des réservations envoyées au fournisseur | Should | Fait |
 | US20 | Automatiser la synchronisation via CRON | Could | Non fait |
 | US22 | Gérer les erreurs HTTP du fournisseur (4xx/5xx) sans casser le paiement | Must | Fait *(ajoutée en cours de développement)* |
-| US23 | Ne jamais synchroniser deux fois la même commande (idempotence) | Must | Fait *(ajoutée en cours de développement)* |
+| US23 | Ne pas resynchroniser une commande déjà traitée avec succès | Must | Fait *(ajoutée en cours de développement)* |
 | US24 | Configurer l'URL du fournisseur sans modifier le code | Should | Fait *(ajoutée en cours de développement)* |
 
 ### Hors périmètre (Won't)
@@ -75,9 +75,9 @@ Système d'avis et de notation, application mobile native, support multilingue, 
 
 ## Règles de gestion
 
-- Le statut d'une commande ne passe à confirmée qu'après confirmation du paiement Stripe **et** réponse positive du Supplier API.
-- Si le Supplier API renvoie une erreur, la commande reste enregistrée ; l'échec est journalisé, aucune tentative silencieuse n'est perdue.
-- Une commande synchronisée avec succès n'est jamais renvoyée une seconde fois au fournisseur (idempotence).
+- La réservation fournisseur est considérée comme confirmée lorsque le paiement Stripe est effectué et que le Supplier API retourne une réponse positive avec un statut `confirmed`. Ce résultat est journalisé ; il ne modifie pas l'état de la commande dans Drupal Commerce, qui reste géré par le workflow standard de paiement.
+- Si le Supplier API renvoie une erreur, la commande reste enregistrée normalement ; l'échec est journalisé, aucune tentative silencieuse n'est perdue.
+- Une commande synchronisée avec succès n'est pas renvoyée une seconde fois au fournisseur lors d'une nouvelle exécution séquentielle (vérification systématique avant tout appel). Cette protection couvre le rejeu séquentiel de l'événement ; une architecture à fort trafic la compléterait par une contrainte d'unicité en base ou un verrou applicatif pour couvrir le cas de requêtes strictement simultanées.
 - Les informations prestataire affichées proviennent exclusivement de l'API Recherche d'entreprises, sans saisie manuelle.
 
 ## Definition of Done

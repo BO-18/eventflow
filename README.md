@@ -10,7 +10,7 @@ Projet personnel de montée en compétences technico-fonctionnelles (Drupal, API
 - **CMS sans code** : types de contenu, taxonomies, Views, formulaires d'administration
 - **Intégration API REST réelle** : import de données publiques françaises (API Recherche d'entreprises) via Migrate Plus, sans PHP
 - **E-commerce** : Drupal Commerce, panier, checkout, paiement Stripe (mode test)
-- **Intégration système à système** : Event Subscriber PHP déclenché sur le paiement d'une commande (`OrderEvents::ORDER_PAID`), appel HTTP vers un fournisseur externe simulé, gestion d'erreurs HTTP, idempotence, journalisation
+- **Intégration système à système** : Event Subscriber PHP déclenché sur le paiement d'une commande (`OrderEvents::ORDER_PAID`), appel HTTP vers un fournisseur externe simulé, gestion d'erreurs HTTP, protection contre la resynchronisation, journalisation
 - **Supervision** : dashboard de synchronisation filtrable
 
 Détail technique complet : [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
@@ -23,7 +23,7 @@ Journal des incidents rencontrés et de leur résolution : [`docs/JOURNAL-DE-BOR
 | CMS | Drupal 11 |
 | E-commerce | Drupal Commerce 3.x |
 | Paiement | Stripe (mode test) |
-| Import de données | Migrate API + Migrate Plus + Migrate Tools |
+| Import de données | Migrate API + Migrate Plus + Drush |
 | Environnement local | DDEV (WSL2 sous Windows) |
 | Tests API | Postman (collections + mock server) |
 
@@ -33,7 +33,7 @@ Journal des incidents rencontrés et de leur résolution : [`docs/JOURNAL-DE-BOR
 - Fiches prestataires alimentées par une vraie source officielle : l'[API Recherche d'entreprises](https://recherche-entreprises.api.gouv.fr) (data.gouv.fr)
 - Panier, checkout, paiement carte bancaire (Stripe test)
 - Réservation automatiquement transmise à un fournisseur externe simulé dès qu'une commande est payée
-- Gestion des erreurs fournisseur (HTTP 4xx/5xx) et idempotence (une commande n'est jamais synchronisée deux fois)
+- Gestion des erreurs fournisseur (HTTP 4xx/5xx) et protection contre la resynchronisation d'une commande déjà traitée avec succès
 - Dashboard de supervision des synchronisations, réservé aux administrateurs
 
 ## Schéma d'architecture
@@ -43,6 +43,10 @@ Voir [`docs/architecture-finale.mermaid`](docs/architecture-finale.mermaid).
 ## Ce qui n'est pas encore fait
 
 Le catalogue produit e-commerce (billets, cartes cadeaux, goodies) a été peuplé manuellement pour cette démonstration plutôt qu'importé automatiquement. L'API [DummyJSON](https://dummyjson.com) a été explorée et testée via Postman (paramètres de chemin, de requête, pagination) dans cet objectif, mais l'import automatisé vers Drupal Commerce reste une extension naturelle non encore construite — même mécanisme que la migration Prestataire, appliqué à un produit Commerce plutôt qu'à un nœud simple.
+
+## Note sur la reproductibilité
+
+Ce dépôt contient le code (modules custom, dépendances déclarées via Composer) et la documentation du projet. La configuration Drupal construite via l'interface d'administration (types de contenu, champs, Views, produits Commerce, passerelle de paiement) n'est pas exportée sous forme de fichiers de configuration versionnés dans `config/sync/`. Cloner ce dépôt donne un Drupal 11 fonctionnel avec les modules custom actifs, mais sans ce contenu — celui-ci a été construit et validé en local. L'export de la configuration active vers `config/sync/` est une amélioration naturelle pour une reproductibilité intégrale.
 
 ## Installation locale
 

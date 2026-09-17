@@ -59,7 +59,6 @@ ddev config --project-type=drupal11 --docroot=web
 ddev start
 ddev composer install
 ddev drush site:install --account-name=admin --account-pass=admin -y
-ddev drush cr
 ```
 
 Configurer ensuite l'URL du Supplier API sur `/admin/config/services/eventflow-integration`, et les clés Stripe test sur `/admin/commerce/config/payment-gateways`.

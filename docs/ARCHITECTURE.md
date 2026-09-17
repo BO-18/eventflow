@@ -35,7 +35,7 @@ Schéma complet : [`architecture-finale.mermaid`](architecture-finale.mermaid).
 
 **Activité** — Titre, Description, Catégorie (référence taxonomie), Prestataire (référence contenu), Ville, Date et heure, Prix, Nombre de places, Durée (minutes), Image.
 
-**Prestataire** — Titre, Ville (`field_ville`), Département (`field_departement`), SIREN (`field_siren`), Statut (`field_statut`, liste : Actif/Fermé), Activité déclarée (`field_activite_declaree`).
+**Prestataire** — Titre, Ville (`field_ville`), Département (`field_departement`), SIREN (`field_siren`), Statut (`field_statut`, liste : Actif/Fermé), Activité déclarée (`field_activite_declaree`) : ces six champs sont alimentés automatiquement par la migration API. Site web (`field_site_web`, type Link) : saisi manuellement pour chaque prestataire, après vérification — l'API Recherche d'entreprises est un registre légal et ne fournit pas cette information.
 
 **Journal de synchronisation** — Titre, Commande ID (`field_commande_id`), Réservation fournisseur (`field_reservation_fournisseur`), Source (`field_source`, liste : DummyJSON/Recherche entreprises/Supplier API), Statut (`field_statut_`, liste : Succès/Avertissement/Erreur), Message (`field_message`).
 

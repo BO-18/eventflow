@@ -1,0 +1,33 @@
+id: dummyjson_variations
+label: 'Import des variations produit depuis DummyJSON'
+migration_group: eventflow
+source:
+  plugin: url
+  data_fetcher_plugin: http
+  data_parser_plugin: json
+  urls:
+    - 'https://dummyjson.com/products/category/sports-accessories?limit=8'
+  item_selector: products
+  fields:
+    - name: id
+      selector: id
+    - name: title
+      selector: title
+    - name: price
+      selector: price
+  ids:
+    id:
+      type: integer
+destination:
+  plugin: 'entity:commerce_product_variation'
+  default_bundle: default
+process:
+  sku: id
+  title: title
+  price/number: price
+  price/currency_code:
+    plugin: default_value
+    default_value: EUR
+  status:
+    plugin: default_value
+    default_value: 1

@@ -4,6 +4,7 @@ migration_group: eventflow
 migration_dependencies:
   required:
     - dummyjson_variations
+    - dummyjson_images
 source:
   plugin: url
   data_fetcher_plugin: http
@@ -34,6 +35,11 @@ process:
     plugin: migration_lookup
     migration: dummyjson_variations
     source: id
+  field_image/target_id:
+    plugin: migration_lookup
+    migration: dummyjson_images
+    source: id
+  field_image/alt: title
   stores:
     plugin: default_value
     default_value: 1

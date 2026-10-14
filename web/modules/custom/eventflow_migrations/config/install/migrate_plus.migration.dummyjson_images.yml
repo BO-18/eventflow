@@ -1,0 +1,38 @@
+id: dummyjson_images
+label: 'Import des images produit depuis DummyJSON'
+migration_group: eventflow
+source:
+  plugin: url
+  data_fetcher_plugin: http
+  data_parser_plugin: json
+  urls:
+    - 'https://dummyjson.com/products/category/sports-accessories?limit=8'
+  item_selector: products
+  fields:
+    - name: id
+      selector: id
+    - name: thumbnail
+      selector: thumbnail
+  ids:
+    id:
+      type: integer
+  constants:
+    destination_dir: 'public://dummyjson/'
+    extension: '.webp'
+destination:
+  plugin: 'entity:file'
+process:
+  psf_destination_uri:
+    plugin: concat
+    source:
+      - constants/destination_dir
+      - id
+      - constants/extension
+  uri:
+    plugin: file_copy
+    source:
+      - thumbnail
+      - '@psf_destination_uri'
+  status:
+    plugin: default_value
+    default_value: 1

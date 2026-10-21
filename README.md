@@ -8,7 +8,7 @@ Projet personnel de montée en compétences technico-fonctionnelles (Drupal, API
 
 - **Product management** : vision produit, personas, parcours utilisateur, cahier des charges avec backlog priorisé MoSCoW (voir [`docs/PRODUIT.md`](docs/PRODUIT.md))
 - **CMS sans code** : types de contenu, taxonomies, Views, formulaires d'administration
-- **Intégration API REST réelle, deux migrations Migrate Plus sans PHP** : prestataires importés depuis l'API Recherche d'entreprises (données légales françaises), catalogue produit importé depuis DummyJSON avec relation Produit et Variation propre à Drupal Commerce
+- **Intégration API REST réelle, deux sources d'API et quatre migrations Migrate Plus sans PHP** : prestataires importés depuis l'API Recherche d'entreprises (données légales françaises), catalogue produit importé depuis DummyJSON (images, variations et produits Drupal Commerce reliés entre eux)
 - **E-commerce** : Drupal Commerce, panier, checkout, paiement Stripe (mode test)
 - **Intégration système à système** : Event Subscriber PHP déclenché sur le paiement d'une commande (`OrderEvents::ORDER_PAID`), appel HTTP vers un fournisseur externe simulé, gestion d'erreurs HTTP, protection contre la resynchronisation, journalisation
 - **Supervision** : dashboard de synchronisation filtrable
@@ -31,7 +31,7 @@ Journal des incidents rencontrés et de leur résolution : [`docs/JOURNAL-DE-BOR
 
 - Catalogue d'activités avec recherche et filtres (catégorie, prix, date), navigation par catégorie
 - Fiches prestataires alimentées par une vraie source officielle : l'[API Recherche d'entreprises](https://recherche-entreprises.api.gouv.fr) (data.gouv.fr), enrichies d'un site officiel vérifié manuellement
-- Catalogue produit (billets, cartes cadeaux, accessoires sportifs) mêlant création manuelle et import automatisé depuis [DummyJSON](https://dummyjson.com) via une migration à deux entités liées (Produit et Variation Commerce)
+- Catalogue produit (billets, cartes cadeaux, accessoires sportifs) mêlant création manuelle et import automatisé depuis [DummyJSON](https://dummyjson.com) via trois migrations chaînées (images, variations Commerce, produits)
 - Panier, checkout, paiement carte bancaire (Stripe test)
 - Réservation automatiquement transmise à un fournisseur externe simulé dès qu'une commande est payée
 - Gestion des erreurs fournisseur (HTTP 4xx/5xx) et protection contre la resynchronisation d'une commande déjà traitée avec succès
@@ -43,7 +43,7 @@ Voir [`docs/architecture-finale.mermaid`](docs/architecture-finale.mermaid).
 
 ## Ce qui n'est pas encore fait
 
-Les images des produits importés depuis DummyJSON ne sont pas encore récupérées automatiquement (l'API les fournit, l'import ne les exploite pas encore). Les billets et cartes cadeaux, eux, restent créés manuellement : DummyJSON n'a pas vocation à fournir ce type de produit, propre à EventFlow.
+Les quatre produits créés à la main (T-shirt, casquette, carte cadeau, billet) n'ont pas d'image. Billets et cartes cadeaux restent par nature créés manuellement : aucune API de test ne fournit ce type de produit, propre à EventFlow. Les produits importés de DummyJSON sont des accessoires de sport génériques (catégorie `sports-accessories`), cohérents avec la catégorie d'activité « Cours de sport ».
 
 ## Note sur la reproductibilité
 

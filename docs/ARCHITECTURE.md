@@ -25,7 +25,7 @@ Schéma complet : [`architecture-finale.mermaid`](architecture-finale.mermaid).
 | CMS | Drupal 11 | Cœur du site |
 | E-commerce | Drupal Commerce 3.x | Catalogue, panier, commande |
 | Paiement | Commerce Stripe (mode test) | Paiement par carte |
-| Import de données | Migrate API + Migrate Plus + Migrate Tools | Import JSON sans PHP |
+| Import de données | Migrate API + Migrate Plus + Drush | Import JSON sans PHP |
 | Environnement local | DDEV sur WSL2 | Conteneurs Docker préconfigurés |
 | Tests API | Postman | Collections + mock server |
 
@@ -47,7 +47,7 @@ Schéma complet : [`architecture-finale.mermaid`](architecture-finale.mermaid).
 
 | Module | Rôle | Contenu |
 |---|---|---|
-| `eventflow_migrations` | Import Prestataire depuis l'API Recherche d'entreprises | Un fichier YAML, aucun PHP |
+| `eventflow_migrations` | Imports Prestataire (API Recherche d'entreprises) et catalogue produit (DummyJSON) | Quatre fichiers YAML, aucun PHP |
 | `eventflow_integration` | Connecteur vers le Supplier API + configuration | Un Event Subscriber, un formulaire de configuration |
 
 ## L'import Prestataire (Migrate Plus)
@@ -105,6 +105,26 @@ process:
 
 Exécution : `ddev drush migrate:import prestataires`. Ré-exécutable sans créer de doublons (Migrate suit les identifiants sources déjà traités).
 
+## L'import du catalogue produit (DummyJSON)
+
+Un produit Drupal Commerce n'est pas une entité unique : il se compose d'un **Produit** (titre, description, image) relié à une ou plusieurs **Variations** (référence SKU et prix, l'unité réellement achetable). L'import suit cette structure avec trois migrations Migrate Plus, exécutées dans cet ordre :
+
+| Migration | Destination | Rôle |
+|---|---|---|
+| `dummyjson_images` | `entity:file` | Télécharge la vignette de chaque produit (plugin `file_copy`) et crée un fichier Drupal nommé d'après l'identifiant DummyJSON (`137.webp`, `138.webp`...) |
+| `dummyjson_variations` | `commerce_product_variation` | Crée la variation : SKU (identifiant DummyJSON) et prix (traité comme des euros, simplification assumée pour une démonstration) |
+| `dummyjson_products` | `commerce_product` | Crée le produit, le relie à sa variation et à son image (`migration_lookup`) et à la boutique EventFlow |
+
+Source : `https://dummyjson.com/products/category/sports-accessories?limit=8`, soit huit accessoires de sport génériques, cohérents avec la catégorie d'activité « Cours de sport ». La migration des produits déclare ses dépendances (`migration_dependencies`) : variations et images doivent être importées avant elle.
+
+Choix techniques :
+
+- **Cœur de Drupal uniquement.** Le plugin `image_import` appartient au module externe Migrate File, dont la dernière version ne déclare pas la compatibilité avec Drupal 11 (vérifié avec une simulation d'installation). L'approche retenue combine un import de fichiers (`entity:file`) et `migration_lookup`.
+- **Un fichier par produit.** Toutes les vignettes de l'API s'appellent `thumbnail.webp` (seul le dossier de l'URL change) : les enregistrer sous leur nom d'origine aurait fait écraser chaque image par la suivante.
+- **Annulation propre.** `drush migrate:rollback` supprime les produits et variations créés par Migrate sans toucher au contenu saisi à la main.
+
+Exécution : `ddev drush migrate:import dummyjson_images`, puis `dummyjson_variations`, puis `dummyjson_products`.
+
 ## Le Supplier API fictif
 
 Un mock server Postman, construit à partir d'une collection avec deux requêtes et leurs réponses pré-enregistrées :
@@ -116,7 +136,7 @@ URL type : `https://xxxx.mock.pstmn.io/post`. Aucun serveur à héberger, aucun 
 
 ## Drupal Commerce
 
-Store unique (EventFlow, EUR, France). Type de produit par défaut, enrichi d'un champ Catégorie produit (Billet / Carte cadeau / Produit dérivé). Panier et checkout fonctionnels nativement dès l'activation des modules `commerce_cart` et `commerce_checkout`, sans configuration additionnelle.
+Store unique (EventFlow, EUR, France). Type de produit par défaut, enrichi d'un champ Catégorie produit (Billet / Carte cadeau / Produit dérivé) et d'un champ Image (`field_image`), alimenté par l'import DummyJSON pour les produits importés. Panier et checkout fonctionnels nativement dès l'activation des modules `commerce_cart` et `commerce_checkout`, sans configuration additionnelle.
 
 ## Paiement Stripe (mode test)
 
@@ -342,4 +362,4 @@ Vue Drupal sur `journal_de_synchronisation`, accessible sur `/dashboard/synchron
 
 ## Ce qui n'est pas encore fait
 
-L'import automatisé du catalogue e-commerce depuis DummyJSON n'a pas été construit — le catalogue de démonstration a été créé manuellement pour prioriser la validation du flux paiement → connecteur. L'API a été explorée et testée (paramètres de chemin/requête, pagination) via Postman. L'extension suivrait le même principe que la migration Prestataire : une migration Migrate Plus ciblant l'entité `commerce_product` plutôt qu'un simple nœud.
+Les quatre produits créés à la main (T-shirt, casquette, carte cadeau, billet) n'ont pas d'image. Billets et cartes cadeaux restent par nature créés manuellement : aucune API de test ne fournit ce type de produit, propre à EventFlow. Les prix importés depuis DummyJSON sont traités comme des euros, sans conversion de devise.

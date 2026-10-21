@@ -46,7 +46,7 @@ Schéma détaillé : voir `parcours-utilisateur-eventflow.mermaid` (livré en d�
 | ID | User story | Priorité | Statut |
 |---|---|---|---|
 | US08 | Ajouter une activité au panier | Must | Fait |
-| US09 | Ajouter des produits complémentaires | Should | Fait (catalogue manuel) |
+| US09 | Ajouter des produits complémentaires | Should | Fait (catalogue mixte : produits créés à la main et import DummyJSON) |
 | US10 | Récapitulatif avant paiement | Must | Fait |
 | US11 | Payer via Stripe en mode test | Must | Fait |
 | US12 | Recevoir une confirmation claire | Must | Fait |
@@ -69,16 +69,17 @@ Schéma détaillé : voir `parcours-utilisateur-eventflow.mermaid` (livré en d�
 | US22 | Gérer les erreurs HTTP du fournisseur (4xx/5xx) sans casser le paiement | Must | Fait *(ajoutée en cours de développement)* |
 | US23 | Ne pas resynchroniser une commande déjà traitée avec succès | Must | Fait *(ajoutée en cours de développement)* |
 | US24 | Configurer l'URL du fournisseur sans modifier le code | Should | Fait *(ajoutée en cours de développement)* |
+| US25 | Alimenter le catalogue produit depuis une API externe, images comprises | Should | Fait *(ajoutée en cours de développement)* |
 
 ### Hors périmètre (Won't)
-Système d'avis et de notation, application mobile native, support multilingue, vrai encaissement, import automatisé du catalogue e-commerce (DummyJSON exploré, non intégré).
+Système d'avis et de notation, application mobile native, support multilingue, vrai encaissement.
 
 ## Règles de gestion
 
 - La réservation fournisseur est considérée comme confirmée lorsque le paiement Stripe est effectué et que le Supplier API retourne une réponse positive avec un statut `confirmed`. Ce résultat est journalisé ; il ne modifie pas l'état de la commande dans Drupal Commerce, qui reste géré par le workflow standard de paiement.
 - Si le Supplier API renvoie une erreur, la commande reste enregistrée normalement ; l'échec est journalisé, aucune tentative silencieuse n'est perdue.
 - Une commande synchronisée avec succès n'est pas renvoyée une seconde fois au fournisseur lors d'une nouvelle exécution séquentielle (vérification systématique avant tout appel). Cette protection couvre le rejeu séquentiel de l'événement ; une architecture à fort trafic la compléterait par une contrainte d'unicité en base ou un verrou applicatif pour couvrir le cas de requêtes strictement simultanées.
-- Les informations prestataire affichées proviennent exclusivement de l'API Recherche d'entreprises, sans saisie manuelle.
+- Les informations légales du prestataire (SIREN, statut, activité déclarée, localisation) proviennent de l'API Recherche d'entreprises. Le site officiel est saisi manuellement après vérification, l'API ne le fournissant pas.
 
 ## Definition of Done
 

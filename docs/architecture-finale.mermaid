@@ -1,6 +1,6 @@
 flowchart TD
     subgraph SOURCES["Sources externes"]
-        DJ["DummyJSON - explore, non integre"]
+        DJ["API DummyJSON - catalogue produit"]
         RE["API Recherche d'entreprises"]
         STRIPE["Stripe API - mode test"]
         SUPPLIER["Supplier API fictif - Postman Mock Server"]
@@ -25,6 +25,8 @@ flowchart TD
     CLIENT["Client"]
 
     RE --> MIG --> PREST --> VIEWPREST
+    DJ -->|"images, variations, produits"| MIG
+    MIG -->|"produits Commerce"| COMMERCE
     PREST --> ACT --> VIEWACT
 
     CLIENT --> VIEWACT

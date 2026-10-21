@@ -74,6 +74,76 @@ Documenter les problèmes rencontrés, pas seulement le résultat final : c'est 
 
 ---
 
+### 7. Photo portrait recadrée dans un bandeau paysage
+
+**Symptôme** — Sur la fiche d'une activité, l'image d'illustration s'affichait recadrée sur une zone sans intérêt (un fragment de texte), puis, après une première correction, beaucoup trop grande.
+
+**Diagnostic** — Raisonnement couche par couche : fichier d'origine (une photo portrait de 4000 x 6000 pixels), style d'image Drupal, balise HTML générée (dimensions lues dans l'inspecteur du navigateur), puis CSS. Un style « Scale » conservait le ratio portrait (1200 x 1800) ; « Scale and crop » en 1200 x 640 produisait bien une bannière, mais recadrée au centre d'une photo verticale.
+
+**Décision** — Garder un bandeau paysage et choisir des photos au format paysage, plutôt que d'empiler des réglages CSS pour compenser une photo inadaptée.
+
+**Ce que ça montre** — Distinguer ce qui relève de la donnée (le format de la photo) de ce qui relève de la présentation avant de corriger.
+
+---
+
+### 8. Produits importés sans rapport avec le projet
+
+**Symptôme** — Le premier import DummyJSON, sans filtre de catégorie, a créé huit produits de parfumerie et de cosmétique, sans lien avec une plateforme d'activités.
+
+**Diagnostic** — Techniquement l'import était correct (8 créés, 0 échec, prix et variations liés) : le problème venait du choix de la source, pas du mécanisme. La liste officielle des catégories de DummyJSON a permis de retenir `sports-accessories`, cohérente avec la catégorie d'activité « Cours de sport ».
+
+**Correction** — `drush migrate:rollback` des deux migrations (suppression des seuls éléments créés par Migrate), changement de l'URL source dans les fichiers YAML, réimport.
+
+**Ce que ça montre** — Un import qui réussit ne prouve pas que la donnée importée est la bonne ; le rollback permet de corriger sans nettoyage manuel.
+
+---
+
+### 9. Configuration de migration orpheline après une désinstallation de module
+
+**Symptôme** — `drush pmu` suivi de `drush en` échouait avec « Configuration objects ... already exist in active configuration ».
+
+**Diagnostic** — La désinstallation du module ne supprimait pas la définition de migration restée dans la configuration active. Une migration est une configuration, distincte des contenus qu'elle a créés : les 10 prestataires importés n'étaient pas concernés (`migrate:status` l'a confirmé, 10 sur 10).
+
+**Correction** — Suppression explicite des définitions avec `drush config:delete`, puis réinstallation du module, qui recrée les définitions depuis les fichiers YAML.
+
+**Ce que ça montre** — Distinguer configuration et contenu avant toute manipulation, pour savoir exactement ce qui peut être perdu.
+
+---
+
+### 10. Module externe incompatible, approche cœur retenue
+
+**Contexte** — Pour importer des images depuis une URL, les plugins `file_import` et `image_import` appartiennent au module contribué Migrate File. Un diagnostic du site a confirmé leur absence ; `composer require drupal/migrate_file --dry-run` (simulation, sans rien modifier) a montré que sa dernière version déclarait Drupal 9 et 10, pas 11.
+
+**Décision** — Ne pas forcer l'installation (l'option `--with-all-dependencies` suggérée par Composer aurait pu rétrograder Drupal lui-même) et utiliser uniquement le cœur : une migration d'images (destination `entity:file`, plugin `file_copy`), puis `migration_lookup` depuis la migration des produits.
+
+**Ce que ça montre** — Tester la compatibilité en simulation avant d'ajouter une dépendance, et préférer une solution sans dépendance fragile pour un composant à maintenir.
+
+---
+
+### 11. Risque d'écrasement des images
+
+**Constat** — Avant d'écrire la migration d'images, l'inspection des vraies données de l'API a montré que toutes les vignettes portent le même nom de fichier (`thumbnail.webp`), seul le dossier de l'URL change.
+
+**Décision** — Nommer chaque fichier d'après l'identifiant DummyJSON (`137.webp`, `138.webp`...) plutôt que de conserver le nom d'origine, qui aurait fait écraser chaque image par la suivante.
+
+**Vérification** — Le dossier de destination contient huit fichiers distincts, et chaque produit pointe vers l'image portant son identifiant.
+
+**Ce que ça montre** — Observer la donnée réelle avant d'écrire la transformation.
+
+---
+
+### 12. README remplacé par un texte d'instruction
+
+**Symptôme** — Après une mise à jour du README, les statistiques du commit indiquaient `1 insertion(+), 64 deletions(-)` : le fichier ne contenait plus qu'une seule ligne.
+
+**Diagnostic** — Une consigne de type « colle ici le contenu » avait été collée telle quelle dans la commande, au lieu d'être remplacée par le contenu réel. La lecture des statistiques du commit l'a révélé.
+
+**Correction** — Fichier restauré par un script contenant directement le contenu complet, puis nouveau commit.
+
+**Ce que ça montre** — Lire les statistiques d'un commit permet de détecter qu'un fichier a été écrasé, avant que l'erreur ne passe inaperçue.
+
+---
+
 ## Pourquoi documenter ça plutôt que le cacher
 
-Ces six incidents ne sont pas des échecs à minimiser : ils illustrent une vraie méthode de diagnostic (isoler une hypothèse, chercher une preuve directe plutôt qu'un indice, tester avant et après correction) — précisément ce qu'un entretien technique cherche à évaluer au-delà de la simple lecture d'un CV.
+Ces douze incidents ne sont pas des échecs à minimiser : ils illustrent une vraie méthode de diagnostic (isoler une hypothèse, chercher une preuve directe plutôt qu'un indice, tester avant et après correction) — précisément ce qu'un entretien technique cherche à évaluer au-delà de la simple lecture d'un CV.
